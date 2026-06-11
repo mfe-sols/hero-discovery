@@ -6,6 +6,7 @@ import {
 
 type Props = {
   locale: "en" | "vi";
+  isAuthenticated: boolean;
 };
 
 type Localized = {
@@ -100,6 +101,7 @@ const LABELS = {
     detailCommentFormAction: "Gửi bình luận",
     detailCommentAuthorName: "Bạn",
     detailCommentAuthorRole: "Du khách đã đăng nhập",
+    detailCommentLoginHint: "Đăng nhập để gửi bình luận và đánh giá về không gian này.",
   },
   en: {
     featureActionLabel: "View more",
@@ -124,6 +126,7 @@ const LABELS = {
     detailCommentFormAction: "Post comment",
     detailCommentAuthorName: "You",
     detailCommentAuthorRole: "Signed-in traveler",
+    detailCommentLoginHint: "Sign in to post a comment and rating for this space.",
   },
 } as const;
 
@@ -347,7 +350,7 @@ const DESTINATIONS: Destination[] = [
   },
 ];
 
-export const AppView = ({ locale }: Props): JSX.Element => {
+export const AppView = ({ locale, isAuthenticated }: Props): JSX.Element => {
   const labels = LABELS[locale];
   const activeDestination = DESTINATIONS[0];
 
@@ -420,7 +423,7 @@ export const AppView = ({ locale }: Props): JSX.Element => {
   return (
     <div className="mfe-hero-app">
       <div className="mfe-hero-app__shell">
-        <HeroDiscovery vm={heroVm} />
+        <HeroDiscovery vm={heroVm} isAuthenticated={isAuthenticated} commentLoginHint={labels.detailCommentLoginHint} />
       </div>
     </div>
   );

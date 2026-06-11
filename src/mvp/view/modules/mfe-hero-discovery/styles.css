@@ -815,6 +815,17 @@
   margin-top: 12px;
 }
 
+.ts-hero-discovery__detail-comment-login-hint {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.56);
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .ts-hero-discovery__detail-comment-rating {
   display: grid;
   gap: 8px;

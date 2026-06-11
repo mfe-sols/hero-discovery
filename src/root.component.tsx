@@ -7,6 +7,10 @@ import { AppView } from "./mvp/view";
 
 type AppLocale = "en" | "vi";
 
+const AUTH_STATE_KEY = "mfe-auth-state";
+const AUTH_SCOPE_KEY = "mfe-auth-storage";
+const AUTH_CHANNEL_NAME = "mfe-auth-channel";
+
 const ensureThemeToggle =
   typeof UiKit.ensureThemeToggle === "function" ? UiKit.ensureThemeToggle : () => null;
 const getStoredLocale =
@@ -23,6 +27,43 @@ const t =
 const getThemeFromElement = (target: Element | null): "light" | "dark" =>
   target?.getAttribute("data-theme") === "dark" ? "dark" : "light";
 
+const getAuthStorage = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    return window.localStorage.getItem(AUTH_SCOPE_KEY) === "session"
+      ? window.sessionStorage
+      : window.localStorage;
+  } catch {
+    return window.localStorage;
+  }
+};
+
+const readAuthState = () => {
+  if (typeof window === "undefined") return null;
+
+  const readFromStorage = (storage: Storage | null) => {
+    if (!storage) return null;
+
+    try {
+      const raw = storage.getItem(AUTH_STATE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" && parsed.tokens ? parsed : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const primaryStorage = getAuthStorage();
+  const primary = readFromStorage(primaryStorage);
+  if (primary?.tokens?.accessToken) return primary;
+
+  const fallbackStorage = primaryStorage === window.localStorage ? window.sessionStorage : window.localStorage;
+  const fallback = readFromStorage(fallbackStorage);
+  return fallback?.tokens?.accessToken ? fallback : null;
+};
+
 export default function Root() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const themeCleanupRef = useRef<(() => void) | null>(null);
@@ -33,6 +74,7 @@ export default function Root() {
     return stored;
   });
   const [queryClient] = useState(() => createQueryClient());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(readAuthState()?.tokens?.accessToken));
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -57,6 +99,44 @@ export default function Root() {
     return () => {
       window.removeEventListener("app-locale-change", onLocaleChange);
       window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const syncAuth = () => {
+      setIsAuthenticated(Boolean(readAuthState()?.tokens?.accessToken));
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== AUTH_STATE_KEY && event.key !== AUTH_SCOPE_KEY) return;
+      syncAuth();
+    };
+
+    let channel: BroadcastChannel | null = null;
+    const onVisibilityOrFocus = () => syncAuth();
+
+    syncAuth();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", onVisibilityOrFocus);
+    document.addEventListener("visibilitychange", onVisibilityOrFocus);
+
+    try {
+      channel = new BroadcastChannel(AUTH_CHANNEL_NAME);
+      channel.addEventListener("message", syncAuth);
+    } catch {
+      channel = null;
+    }
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", onVisibilityOrFocus);
+      if (channel) {
+        channel.removeEventListener("message", syncAuth);
+        channel.close();
+      }
     };
   }, []);
 
@@ -158,7 +238,7 @@ export default function Root() {
   return (
     <QueryClientProvider client={queryClient}>
       <main ref={rootRef}>
-        <AppView locale={locale === "vi" ? "vi" : "en"} />
+        <AppView locale={locale === "vi" ? "vi" : "en"} isAuthenticated={isAuthenticated} />
       </main>
     </QueryClientProvider>
   );

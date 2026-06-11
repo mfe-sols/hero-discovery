@@ -6,6 +6,8 @@ import type { HeroDiscoveryDetailHotspot, HeroDiscoveryViewModel } from "./model
 
 type HeroDiscoveryProps = {
   vm: HeroDiscoveryViewModel;
+  isAuthenticated: boolean;
+  commentLoginHint: string;
 };
 
 const DEG2RAD = Math.PI / 180;
@@ -94,7 +96,7 @@ function loadTexture(
   };
 }
 
-export const HeroDiscovery = ({ vm }: HeroDiscoveryProps): JSX.Element => {
+export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDiscoveryProps): JSX.Element => {
   const detailRef = useRef<HTMLDivElement | null>(null);
   const featureRef = useRef<HTMLElement | null>(null);
   const featureCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -155,7 +157,7 @@ export const HeroDiscovery = ({ vm }: HeroDiscoveryProps): JSX.Element => {
   const isActiveFeaturePanoramaReady = !activeFeaturePanoramaUrl || displayedFeaturePanoramaUrl === activeFeaturePanoramaUrl;
 
   const detailComments = useMemo(() => {
-    if (!submittedComment?.trim()) return vm.detailComments;
+    if (!isAuthenticated || !submittedComment?.trim()) return vm.detailComments;
 
     return [
       {
@@ -167,7 +169,7 @@ export const HeroDiscovery = ({ vm }: HeroDiscoveryProps): JSX.Element => {
       },
       ...vm.detailComments,
     ];
-  }, [commentRating, submittedComment, submittedRating, vm.detailCommentAuthorName, vm.detailCommentAuthorRole, vm.detailComments]);
+  }, [commentRating, isAuthenticated, submittedComment, submittedRating, vm.detailCommentAuthorName, vm.detailCommentAuthorRole, vm.detailComments]);
 
   const resetViewpoint = useCallback(() => {
     cameraRef.current = { lon: 0, lat: 0, fov: 75 };
@@ -260,6 +262,8 @@ export const HeroDiscovery = ({ vm }: HeroDiscoveryProps): JSX.Element => {
 
   const onSubmitComment = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    if (!isAuthenticated) return;
+
     const nextComment = commentDraft.trim();
     if (!nextComment) return;
 
@@ -881,48 +885,54 @@ export const HeroDiscovery = ({ vm }: HeroDiscoveryProps): JSX.Element => {
                     </div>
                   </section>
 
-                  <form className="ts-hero-discovery__detail-comment-form" onSubmit={onSubmitComment}>
-                    <div className="ts-hero-discovery__detail-comment-rating" role="group" aria-label={vm.detailCommentRatingLabel}>
-                      <span className="ts-hero-discovery__detail-comment-form-label">{vm.detailCommentRatingLabel}</span>
-                      <div className="ts-hero-discovery__detail-comment-stars">
-                        {[1, 2, 3, 4, 5].map((ratingValue) => {
-                          const active = ratingValue <= commentRating;
-                          return (
-                            <button
-                              key={ratingValue}
-                              type="button"
-                              className={`ts-hero-discovery__detail-comment-star${active ? " ts-hero-discovery__detail-comment-star--active" : ""}`}
-                              onClick={() => setCommentRating(ratingValue)}
-                              aria-label={`${vm.detailCommentRatingLabel} ${ratingValue}`}
-                              aria-pressed={active}
-                            >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
-                              </svg>
-                            </button>
-                          );
-                        })}
+                  {isAuthenticated ? (
+                    <form className="ts-hero-discovery__detail-comment-form" onSubmit={onSubmitComment}>
+                      <div className="ts-hero-discovery__detail-comment-rating" role="group" aria-label={vm.detailCommentRatingLabel}>
+                        <span className="ts-hero-discovery__detail-comment-form-label">{vm.detailCommentRatingLabel}</span>
+                        <div className="ts-hero-discovery__detail-comment-stars">
+                          {[1, 2, 3, 4, 5].map((ratingValue) => {
+                            const active = ratingValue <= commentRating;
+                            return (
+                              <button
+                                key={ratingValue}
+                                type="button"
+                                className={`ts-hero-discovery__detail-comment-star${active ? " ts-hero-discovery__detail-comment-star--active" : ""}`}
+                                onClick={() => setCommentRating(ratingValue)}
+                                aria-label={`${vm.detailCommentRatingLabel} ${ratingValue}`}
+                                aria-pressed={active}
+                              >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
+                      <label className="ts-hero-discovery__detail-comment-form-label" htmlFor="ts-hero-discovery-comment-input">
+                        {vm.detailCommentFormLabel}
+                      </label>
+                      <textarea
+                        id="ts-hero-discovery-comment-input"
+                        className="ts-hero-discovery__detail-comment-textarea"
+                        value={commentDraft}
+                        onChange={(event) => setCommentDraft(event.target.value)}
+                        placeholder={vm.detailCommentFormPlaceholder}
+                        rows={3}
+                      />
+                      <button
+                        type="submit"
+                        className="ts-hero-discovery__detail-comment-submit"
+                        disabled={!commentDraft.trim()}
+                      >
+                        <span>{vm.detailCommentFormAction}</span>
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="ts-hero-discovery__detail-comment-login-hint" role="note">
+                      {commentLoginHint}
                     </div>
-                    <label className="ts-hero-discovery__detail-comment-form-label" htmlFor="ts-hero-discovery-comment-input">
-                      {vm.detailCommentFormLabel}
-                    </label>
-                    <textarea
-                      id="ts-hero-discovery-comment-input"
-                      className="ts-hero-discovery__detail-comment-textarea"
-                      value={commentDraft}
-                      onChange={(event) => setCommentDraft(event.target.value)}
-                      placeholder={vm.detailCommentFormPlaceholder}
-                      rows={3}
-                    />
-                    <button
-                      type="submit"
-                      className="ts-hero-discovery__detail-comment-submit"
-                      disabled={!commentDraft.trim()}
-                    >
-                      <span>{vm.detailCommentFormAction}</span>
-                    </button>
-                  </form>
+                  )}
                 </div>
               </aside>
 
