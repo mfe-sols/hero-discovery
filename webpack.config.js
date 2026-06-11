@@ -14,12 +14,6 @@ module.exports = (webpackConfigEnv, argv) => {
   });
 
   defaultConfig.resolve = defaultConfig.resolve || {};
-  defaultConfig.resolve.alias = {
-    ...(defaultConfig.resolve.alias || {}),
-    // Keep local workspace builds on the source entrypoints that expose the full ESM API.
-    "@mfe-sols/i18n$": path.resolve(__dirname, "../../libs/i18n/src/index.ts"),
-    "@mfe-sols/ui-kit$": path.resolve(__dirname, "../../libs/ui-kit/design-system/src/index.ts"),
-  };
 
   /* ── Prioritise .ts/.tsx so Webpack picks ESM sources in libs/ ── */
   defaultConfig.resolve.extensions = [
