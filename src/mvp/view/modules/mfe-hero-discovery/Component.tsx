@@ -132,6 +132,8 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const [displayedFeaturePanoramaUrl, setDisplayedFeaturePanoramaUrl] = useState<string | null>(null);
   const [activeFeatureId, setActiveFeatureId] = useState(vm.featureArticles[0]?.id ?? "");
   const [isFeatureRailPaused, setIsFeatureRailPaused] = useState(false);
+  const [discoveryQuery, setDiscoveryQuery] = useState("");
+  const [activeDiscoveryFilter, setActiveDiscoveryFilter] = useState(vm.discoveryFilters[0] ?? "");
   const [commentDraft, setCommentDraft] = useState("");
   const [commentRating, setCommentRating] = useState(() => clampRating(vm.detailComments[0]?.rating ?? 5));
   const [submittedComment, setSubmittedComment] = useState<string | null>(null);
@@ -188,6 +190,17 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     setActiveFeatureId(articleId);
   }, []);
 
+  const handleDiscoverySubmit = useCallback((event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    setIsFeatureRailPaused(true);
+  }, []);
+
+  const handleDiscoveryFilter = useCallback((filter: string) => {
+    setActiveDiscoveryFilter(filter);
+    setDiscoveryQuery(filter);
+    setIsFeatureRailPaused(true);
+  }, []);
+
   useEffect(() => {
     autoRotateRef.current = autoRotate;
   }, [autoRotate]);
@@ -230,11 +243,13 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   useEffect(() => {
     setActiveRoomId(vm.detailRooms[0]?.id ?? "");
     setActiveFeatureId(vm.featureArticles[0]?.id ?? "");
+    setActiveDiscoveryFilter(vm.discoveryFilters[0] ?? "");
+    setDiscoveryQuery("");
     setCommentDraft("");
     setSubmittedComment(null);
     setSubmittedRating(null);
     setCommentRating(clampRating(vm.detailComments[0]?.rating ?? 5));
-  }, [vm.detailComments, vm.detailRooms, vm.featureArticles]);
+  }, [vm.detailComments, vm.detailRooms, vm.discoveryFilters, vm.featureArticles]);
 
   useEffect(() => {
     if (isDetailOpen || isFeatureRailPaused || isFeatureViewerLoading || !isActiveFeaturePanoramaReady || vm.featureArticles.length < 2) return undefined;
@@ -703,6 +718,45 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
             <span className="ts-hero-discovery__cover-skeleton-action" />
           </span>
         ) : null}
+
+        <form className="ts-hero-discovery__discovery-bar" role="search" onSubmit={handleDiscoverySubmit}>
+          <label className="ts-hero-discovery__discovery-label" htmlFor="ts-hero-discovery-search">
+            {vm.discoverySearchLabel}
+          </label>
+          <div className="ts-hero-discovery__search-row">
+            <input
+              id="ts-hero-discovery-search"
+              className="ts-hero-discovery__search-input"
+              type="search"
+              value={discoveryQuery}
+              onChange={(event) => setDiscoveryQuery(event.currentTarget.value)}
+              placeholder={vm.discoverySearchPlaceholder}
+              autoComplete="off"
+            />
+            <button className="ts-hero-discovery__search-submit" type="submit" aria-label={vm.discoverySearchActionLabel}>
+              <span className="ts-hero-discovery__search-icon" aria-hidden="true">
+                <span className="ts-hero-discovery__search-icon-bezel" />
+                <span className="ts-hero-discovery__search-icon-needle" />
+                <span className="ts-hero-discovery__search-icon-hub" />
+                <span className="ts-hero-discovery__search-icon-spark" />
+              </span>
+            </button>
+          </div>
+          <div className="ts-hero-discovery__quick-filters" aria-label={vm.discoveryQuickFiltersLabel}>
+            <span className="ts-hero-discovery__quick-filters-label">{vm.discoveryQuickFiltersLabel}:</span>
+            {vm.discoveryFilters.map((filter) => (
+              <button
+                key={filter}
+                type="button"
+                className={`ts-hero-discovery__quick-filter${filter === activeDiscoveryFilter ? " ts-hero-discovery__quick-filter--active" : ""}`}
+                onClick={() => handleDiscoveryFilter(filter)}
+                aria-pressed={filter === activeDiscoveryFilter}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </form>
 
         <span className="ts-hero-discovery__vr-badge">{vm.featureVrBadgeLabel}</span>
 

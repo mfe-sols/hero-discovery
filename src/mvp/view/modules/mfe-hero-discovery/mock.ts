@@ -1,6 +1,11 @@
 import type { HeroDiscoveryData } from "./model";
 
 export const HERO_DISCOVERY_MOCK: HeroDiscoveryData = {
+  discoverySearchLabel: "Find a destination",
+  discoverySearchPlaceholder: "Search Phu Quoc, Sa Pa, Hoi An...",
+  discoverySearchActionLabel: "Search",
+  discoveryQuickFiltersLabel: "Quick filters",
+  discoveryFilters: ["This season", "2 days", "Family", "Beach", "Mountain"],
   featureActionLabel: "View more",
   featureImageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=80&auto=format&fit=crop",
   featureImageAlt: "Phu Quoc beach panorama preview",

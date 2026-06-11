@@ -36,6 +36,11 @@ export type HeroDiscoveryFeatureArticle = {
 };
 
 export type HeroDiscoveryData = {
+  discoverySearchLabel: string;
+  discoverySearchPlaceholder: string;
+  discoverySearchActionLabel: string;
+  discoveryQuickFiltersLabel: string;
+  discoveryFilters: string[];
   featureActionLabel: string;
   featureImageUrl: string;
   featureImageAlt: string;

@@ -79,6 +79,11 @@ const THUMB = {
 
 const LABELS = {
   vi: {
+    discoverySearchLabel: "Tìm điểm đến",
+    discoverySearchPlaceholder: "Tìm Phú Quốc, Sa Pa, Hội An...",
+    discoverySearchActionLabel: "Tìm kiếm",
+    discoveryQuickFiltersLabel: "Gợi ý nhanh",
+    discoveryFilters: ["Mùa này", "2 ngày", "Gia đình", "Biển", "Núi"],
     featureActionLabel: "Xem thêm",
     featureVrBadgeLabel: "360° VR",
     detailBackLabel: "Quay lại điểm đến",
@@ -104,6 +109,11 @@ const LABELS = {
     detailCommentLoginHint: "Đăng nhập để gửi bình luận và đánh giá về không gian này.",
   },
   en: {
+    discoverySearchLabel: "Find a destination",
+    discoverySearchPlaceholder: "Search Phu Quoc, Sa Pa, Hoi An...",
+    discoverySearchActionLabel: "Search",
+    discoveryQuickFiltersLabel: "Quick filters",
+    discoveryFilters: ["This season", "2 days", "Family", "Beach", "Mountain"],
     featureActionLabel: "View more",
     featureVrBadgeLabel: "360° VR",
     detailBackLabel: "Back to destinations",
@@ -356,6 +366,11 @@ export const AppView = ({ locale, isAuthenticated }: Props): JSX.Element => {
 
   const heroVm = useMemo(
     () => createHeroDiscoveryViewModel({
+      discoverySearchLabel: labels.discoverySearchLabel,
+      discoverySearchPlaceholder: labels.discoverySearchPlaceholder,
+      discoverySearchActionLabel: labels.discoverySearchActionLabel,
+      discoveryQuickFiltersLabel: labels.discoveryQuickFiltersLabel,
+      discoveryFilters: [...labels.discoveryFilters],
       featureActionLabel: labels.featureActionLabel,
       featureImageUrl: activeDestination.imageUrl,
       featureImageAlt: text(activeDestination.imageAlt, locale),

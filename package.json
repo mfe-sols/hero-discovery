@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "start": "webpack serve --port 9017 --env standalone",
-    "start:standalone": "webpack serve --env standalone",
+    "start": "node ./scripts/start-dev.js --default-port 9017",
+    "start:standalone": "node ./scripts/start-dev.js",
     "build": "pnpm run build:webpack && pnpm run build:types",
     "build:webpack": "webpack --mode=production",
     "build:types": "tsc",
