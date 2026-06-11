@@ -1,0 +1,22 @@
+{
+  "name": "mfe-hero-discovery",
+  "projectType": "application",
+  "root": "apps/mfe-hero-discovery",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/mfe-hero-discovery",
+        "command": "pnpm start"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/mfe-hero-discovery",
+        "command": "pnpm build"
+      },
+      "outputs": ["{workspaceRoot}/apps/mfe-hero-discovery/dist"]
+    }
+  }
+}

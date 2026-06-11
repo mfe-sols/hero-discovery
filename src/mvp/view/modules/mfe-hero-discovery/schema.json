@@ -1,0 +1,15 @@
+{
+  "name": "hero-discovery",
+  "domain": "travel-social",
+  "framework": "react",
+  "type": "section-module",
+  "description": "First-screen discovery section for destination search, trip intent, and featured travel context.",
+  "runtime": {
+    "localhost": "inherits-host-app",
+    "rootConfig": "inherits-host-app",
+    "vercel": "inherits-host-app"
+  },
+  "slots": ["headline", "search", "quickFilters", "featurePanel"],
+  "supports": ["i18n-ready", "theme-aware", "responsive", "mock-data", "seo-friendly-copy"],
+  "exports": ["HeroDiscovery", "createHeroDiscoveryViewModel", "HERO_DISCOVERY_MOCK"]
+}

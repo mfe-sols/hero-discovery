@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "declarationDir": "dist",
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "files": ["src/org-mfe-hero-discovery.tsx"],
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test*"]
+}

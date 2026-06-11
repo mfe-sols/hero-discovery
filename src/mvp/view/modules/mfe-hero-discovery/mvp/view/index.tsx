@@ -1,0 +1,1 @@
+export { HeroDiscovery } from "../../Component";

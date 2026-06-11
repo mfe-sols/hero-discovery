@@ -1,0 +1,1229 @@
+.ts-hero-discovery {
+  --ts-hero-skeleton-bg: linear-gradient(120deg, rgba(226, 232, 240, 0.98) 0%, rgba(241, 245, 249, 0.96) 42%, rgba(203, 213, 225, 0.98) 100%);
+  --ts-hero-skeleton-shimmer: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.74) 48%, transparent 100%);
+  --ts-hero-skeleton-item: rgba(255, 255, 255, 0.66);
+  --ts-hero-skeleton-item-strong: rgba(148, 163, 184, 0.28);
+  --ts-hero-skeleton-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 14px 34px rgba(15, 23, 42, 0.08);
+  min-height: max(560px, calc(100svh - var(--ts-hero-shell-offset, 116px)));
+}
+
+[data-theme="dark"] .mfe-hero-app .ts-hero-discovery,
+.mfe-hero-app[data-theme="dark"] .ts-hero-discovery {
+  --ts-hero-skeleton-bg: linear-gradient(120deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.94) 44%, rgba(51, 65, 85, 0.96) 100%);
+  --ts-hero-skeleton-shimmer: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 48%, transparent 100%);
+  --ts-hero-skeleton-item: rgba(255, 255, 255, 0.14);
+  --ts-hero-skeleton-item-strong: rgba(255, 255, 255, 0.08);
+  --ts-hero-skeleton-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ts-hero-discovery__feature {
+  position: relative;
+  min-height: max(560px, calc(100svh - var(--ts-hero-shell-offset, 116px)));
+  overflow: hidden;
+  background: #020617;
+}
+
+.ts-hero-discovery__feature:fullscreen,
+.ts-hero-discovery__feature.is-fullscreen {
+  min-height: 100svh;
+  border-radius: 0;
+}
+
+.ts-hero-discovery__cover-link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ts-hero-discovery__cover-canvas,
+.ts-hero-discovery__cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-hero-discovery__cover-canvas {
+  z-index: 0;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 420ms ease;
+}
+
+.ts-hero-discovery__cover-canvas.is-hidden {
+  opacity: 0;
+}
+
+.ts-hero-discovery__cover-fallback {
+  z-index: 1;
+  object-fit: cover;
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+.ts-hero-discovery__cover-fallback.is-hidden {
+  opacity: 0;
+}
+
+.ts-hero-discovery__cover-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: block;
+  overflow: hidden;
+  background: var(--ts-hero-skeleton-bg);
+  pointer-events: none;
+}
+
+.ts-hero-discovery__cover-skeleton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ts-hero-skeleton-shimmer);
+  transform: translateX(-100%);
+  animation: ts-hero-discovery-skeleton-shimmer 1.35s linear infinite;
+}
+
+.ts-hero-discovery__cover-skeleton-band,
+.ts-hero-discovery__cover-skeleton-title,
+.ts-hero-discovery__cover-skeleton-action {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  background: var(--ts-hero-skeleton-item);
+  box-shadow: var(--ts-hero-skeleton-shadow);
+}
+
+.ts-hero-discovery__cover-skeleton-band {
+  left: clamp(20px, 4vw, 52px);
+  right: clamp(20px, 4vw, 52px);
+  top: 28px;
+  height: 8px;
+  opacity: 0.48;
+  background: var(--ts-hero-skeleton-item-strong);
+}
+
+.ts-hero-discovery__cover-skeleton-title {
+  left: clamp(20px, 4vw, 52px);
+  bottom: clamp(88px, 10vw, 136px);
+  width: min(54vw, 620px);
+  height: clamp(44px, 6vw, 78px);
+  border-radius: 18px;
+}
+
+.ts-hero-discovery__cover-skeleton-action {
+  right: clamp(20px, 4vw, 52px);
+  bottom: clamp(38px, 5vw, 68px);
+  width: 132px;
+  height: 44px;
+}
+
+.ts-hero-discovery__feature--loading .ts-hero-discovery__vr-badge,
+.ts-hero-discovery__feature--loading .ts-hero-discovery__content {
+  opacity: 0;
+}
+
+.ts-hero-discovery__vr-badge,
+.ts-hero-discovery__content {
+  transition: opacity 220ms ease;
+}
+
+.ts-hero-discovery__feature--loading .ts-hero-discovery__feature-rail {
+  opacity: 0;
+}
+
+.ts-hero-discovery__feature-rail {
+  position: absolute;
+  left: clamp(20px, 3vw, 32px);
+  top: clamp(28px, 5vw, 52px);
+  bottom: clamp(132px, 16vw, 176px);
+  z-index: 6;
+  width: clamp(132px, 13vw, 176px);
+  display: flex;
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.ts-hero-discovery__feature-rail-track {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 3px 4px 3px 0;
+  scrollbar-width: none;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+
+.ts-hero-discovery__feature-rail-track::-webkit-scrollbar {
+  display: none;
+}
+
+.ts-hero-discovery__feature-card {
+  position: relative;
+  flex: 0 0 clamp(82px, 8vw, 104px);
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 0;
+  background: rgba(2, 6, 23, 0.42);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.22);
+  transform: translateZ(0);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+.ts-hero-discovery__feature-card:hover,
+.ts-hero-discovery__feature-card:focus-visible,
+.ts-hero-discovery__feature-card--active {
+  border-color: rgba(103, 232, 249, 0.78);
+  box-shadow: 0 16px 36px rgba(14, 165, 233, 0.2), 0 0 0 2px rgba(103, 232, 249, 0.22);
+  outline: none;
+}
+
+.ts-hero-discovery__feature-card:hover,
+.ts-hero-discovery__feature-card:focus-visible {
+  transform: translateX(2px);
+}
+
+.ts-hero-discovery__feature-card--active {
+  transform: translateX(4px);
+}
+
+.ts-hero-discovery__feature-card img,
+.ts-hero-discovery__feature-card-shade {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-hero-discovery__feature-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+}
+
+.ts-hero-discovery__feature-card-shade {
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.04) 0%, rgba(2, 6, 23, 0.78) 100%);
+}
+
+.ts-hero-discovery__feature-card-name {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 9px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: left;
+  text-shadow: 0 2px 8px rgba(2, 6, 23, 0.78);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.ts-hero-discovery__feature-card-kicker {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 9px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: left;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(2, 6, 23, 0.68);
+}
+
+.ts-hero-discovery__cover-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.02) 0%, rgba(2, 6, 23, 0.12) 48%, rgba(2, 6, 23, 0.58) 100%),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 30%);
+  pointer-events: none;
+}
+
+.ts-hero-discovery__vr-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0891b2, #0ea5e9);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.22);
+}
+
+.ts-hero-discovery__content {
+  position: absolute;
+  left: clamp(20px, 4vw, 52px);
+  right: clamp(20px, 4vw, 52px);
+  bottom: clamp(32px, 5vw, 64px);
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ts-hero-discovery__feature:fullscreen .ts-hero-discovery__content,
+.ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__content {
+  top: max(72px, env(safe-area-inset-top, 0px) + 40px);
+  bottom: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 20px;
+  max-width: min(72vw, 980px);
+}
+
+.ts-hero-discovery__title {
+  max-width: 50vw;
+  margin: 0;
+  padding-bottom: 0.08em;
+}
+
+.ts-hero-discovery__feature:fullscreen .ts-hero-discovery__title,
+.ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__title {
+  max-width: min(64vw, 920px);
+}
+
+.ts-hero-discovery__title-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Baskerville", Georgia, serif;
+  font-size: clamp(36px, 5.8vw, 84px);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-align: left;
+  cursor: pointer;
+  text-shadow: 0 12px 30px rgba(2, 6, 23, 0.42);
+  text-wrap: balance;
+}
+
+.ts-hero-discovery__feature:fullscreen .ts-hero-discovery__title-link,
+.ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__title-link {
+  font-size: clamp(34px, 5.2vw, 72px);
+  line-height: 0.96;
+}
+
+.ts-hero-discovery__title-link:hover,
+.ts-hero-discovery__title-link:focus-visible {
+  color: #67e8f9;
+  outline: none;
+}
+
+.ts-hero-discovery__view-more {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.ts-hero-discovery__view-more:hover,
+.ts-hero-discovery__view-more:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(103, 232, 249, 0.42);
+  outline: none;
+}
+
+.ts-hero-discovery__detail {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  background: transparent;
+  color: #fff;
+  animation: ts-hero-discovery-detail-fade 220ms ease;
+}
+
+.ts-hero-discovery__detail-scene,
+.ts-hero-discovery__detail-image,
+.ts-hero-discovery__detail-canvas,
+.ts-hero-discovery__detail-top-gradient,
+.ts-hero-discovery__detail-bottom-gradient {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-hero-discovery__detail-scene {
+  background: transparent;
+}
+
+.ts-hero-discovery__detail-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ts-hero-discovery__detail-canvas:active {
+  cursor: grabbing;
+}
+
+.ts-hero-discovery__detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-hero-discovery__detail-top-gradient {
+  background: transparent;
+  pointer-events: none;
+}
+
+.ts-hero-discovery__detail-bottom-gradient {
+  background: transparent;
+  pointer-events: none;
+}
+
+.ts-hero-discovery__detail-hint,
+.ts-hero-discovery__detail-loading {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  pointer-events: none;
+}
+
+.ts-hero-discovery__detail-hint {
+  bottom: 104px;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  background: rgba(3, 7, 18, 0.56);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.28);
+}
+
+.ts-hero-discovery__detail-loading {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 18px;
+  background: rgba(3, 7, 18, 0.78);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.34);
+}
+
+.ts-hero-discovery__detail-loading--error {
+  background: rgba(127, 29, 29, 0.82);
+}
+
+.ts-hero-discovery__detail-arrow {
+  position: absolute;
+  z-index: 12;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.25s ease, transform 0.2s ease;
+  animation: ts-hero-discovery-arrow-entry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes ts-hero-discovery-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.ts-hero-discovery__detail-arrow:hover,
+.ts-hero-discovery__detail-arrow:focus-visible {
+  transform: translate(-50%, -50%) scale(1.18);
+  outline: none;
+}
+
+.ts-hero-discovery__detail-arrow:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.ts-hero-discovery__detail-arrow-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  border-radius: 50%;
+  animation: ts-hero-discovery-pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+.ts-hero-discovery__detail-arrow-icon {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.85);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.3);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ts-hero-discovery__detail-arrow:hover .ts-hero-discovery__detail-arrow-icon,
+.ts-hero-discovery__detail-arrow:focus-visible .ts-hero-discovery__detail-arrow-icon {
+  background: rgba(99, 102, 241, 1);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.ts-hero-discovery__detail-arrow-label {
+  position: relative;
+  z-index: 1;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.ts-hero-discovery__detail-arrow:hover .ts-hero-discovery__detail-arrow-label,
+.ts-hero-discovery__detail-arrow:focus-visible .ts-hero-discovery__detail-arrow-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ts-hero-discovery__detail-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ts-hero-discovery-spin 800ms linear infinite;
+}
+
+.ts-hero-discovery__detail-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.18) 100%);
+}
+
+.ts-hero-discovery__detail-back-btn,
+.ts-hero-discovery__detail-icon-btn,
+.ts-hero-discovery__detail-panel-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.82);
+  color: #1e293b;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.ts-hero-discovery__detail-back-btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ts-hero-discovery__detail-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.ts-hero-discovery__detail-back-btn:hover,
+.ts-hero-discovery__detail-back-btn:focus-visible,
+.ts-hero-discovery__detail-icon-btn:hover,
+.ts-hero-discovery__detail-icon-btn:focus-visible,
+.ts-hero-discovery__detail-panel-toggle:hover,
+.ts-hero-discovery__detail-panel-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(14, 165, 233, 0.2);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+  outline: none;
+}
+
+.ts-hero-discovery__detail-icon-btn.is-active,
+.ts-hero-discovery__detail-panel-toggle.is-active {
+  background: rgba(14, 165, 233, 0.12);
+  border-color: rgba(14, 165, 233, 0.2);
+  color: #0369a1;
+}
+
+.ts-hero-discovery__detail-title {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0 16px;
+  text-align: center;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-hero-discovery__detail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-hero-discovery__detail-panel {
+  position: absolute;
+  top: 78px;
+  right: 16px;
+  z-index: 18;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 156px);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(241, 245, 249, 0.74) 100%);
+  color: #0f172a;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(14px) saturate(125%);
+  overflow: hidden;
+  transition: width 0.28s ease, max-height 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel {
+  width: min(48vw, 720px);
+  max-height: calc(100dvh - 108px);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.ts-hero-discovery__detail-panel-scroll {
+  height: 100%;
+  max-height: calc(100dvh - 156px);
+  padding: 16px 14px 16px 18px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel-scroll {
+  max-height: calc(100dvh - 108px);
+}
+
+.ts-hero-discovery__detail-panel-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ts-hero-discovery__detail-panel-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.24);
+}
+
+.ts-hero-discovery__detail-panel-head,
+.ts-hero-discovery__detail-review-head,
+.ts-hero-discovery__detail-review-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ts-hero-discovery__detail-panel-head {
+  margin-bottom: 6px;
+}
+
+.ts-hero-discovery__detail-kicker,
+.ts-hero-discovery__detail-review-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(51, 65, 85, 0.76);
+}
+
+.ts-hero-discovery__detail-panel-toggle {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ts-hero-discovery__detail-panel-toggle:hover,
+.ts-hero-discovery__detail-panel-toggle:focus-visible {
+  transform: translateY(-1px);
+}
+
+.ts-hero-discovery__detail-room-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ts-hero-discovery__detail-address {
+  margin: 8px 0 0;
+  color: rgba(51, 65, 85, 0.82);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ts-hero-discovery__detail-summary {
+  margin: 10px 0 18px;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+.ts-hero-discovery__detail-review-block {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.ts-hero-discovery__detail-review-summary,
+.ts-hero-discovery__detail-review-item-rating {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.ts-hero-discovery__detail-review-summary {
+  gap: 6px;
+  color: rgba(103, 232, 249, 0.95);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ts-hero-discovery__detail-review-item-rating {
+  gap: 5px;
+  color: rgba(51, 65, 85, 0.82);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ts-hero-discovery__detail-review-rating-icon {
+  flex: 0 0 auto;
+  color: #d97706;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+}
+
+.ts-hero-discovery__detail-review-list {
+  display: grid;
+  gap: 14px;
+}
+
+.ts-hero-discovery__detail-review-item {
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.ts-hero-discovery__detail-review-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ts-hero-discovery__detail-review-author {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ts-hero-discovery__detail-review-text {
+  margin: 10px 0 0;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ts-hero-discovery__detail-comment-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ts-hero-discovery__detail-comment-rating {
+  display: grid;
+  gap: 8px;
+}
+
+.ts-hero-discovery__detail-comment-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ts-hero-discovery__detail-comment-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.75);
+  cursor: pointer;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.ts-hero-discovery__detail-comment-star:hover,
+.ts-hero-discovery__detail-comment-star:focus-visible {
+  color: #f59e0b;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.ts-hero-discovery__detail-comment-star--active {
+  color: #d97706;
+}
+
+.ts-hero-discovery__detail-comment-form-label {
+  color: rgba(51, 65, 85, 0.76);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ts-hero-discovery__detail-comment-textarea {
+  width: 100%;
+  min-height: 88px;
+  max-height: min(24dvh, 180px);
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+}
+
+.ts-hero-discovery__detail-comment-textarea::placeholder {
+  color: rgba(100, 116, 139, 0.78);
+}
+
+.ts-hero-discovery__detail-comment-textarea:focus {
+  border-color: rgba(14, 165, 233, 0.48);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.ts-hero-discovery__detail-comment-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: flex-start;
+  min-width: 128px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #67e8f9 0%, #0ea5e9 100%);
+  color: #062031;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.24);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.ts-hero-discovery__detail-comment-submit:hover:not(:disabled),
+.ts-hero-discovery__detail-comment-submit:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(14, 165, 233, 0.3);
+  outline: none;
+}
+
+.ts-hero-discovery__detail-comment-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.ts-hero-discovery__detail-room-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.ts-hero-discovery__detail-room-btn {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 88px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 180ms ease;
+}
+
+.ts-hero-discovery__detail-room-btn:hover,
+.ts-hero-discovery__detail-room-btn:focus-visible,
+.ts-hero-discovery__detail-room-btn--active {
+  border-color: rgba(255, 255, 255, 0.52);
+  outline: none;
+}
+
+.ts-hero-discovery__detail-room-btn:hover,
+.ts-hero-discovery__detail-room-btn:focus-visible {
+  transform: translateY(-1px);
+}
+
+.ts-hero-discovery__detail-room-btn--active {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px #38bdf8, 0 14px 28px rgba(14, 165, 233, 0.24);
+  transform: translateY(-2px);
+}
+
+.ts-hero-discovery__detail-room-thumb {
+  display: block;
+  width: 100%;
+  height: 56px;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.ts-hero-discovery__detail-room-name {
+  display: block;
+  width: 100%;
+  padding: 6px 6px 7px;
+  background: rgba(2, 6, 23, 0.64);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+
+@keyframes ts-hero-discovery-detail-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ts-hero-discovery-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ts-hero-discovery-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+
+  70%,
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes ts-hero-discovery-arrow-entry {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.mfe-hero-app {
+  --ts-hero-shell-offset: 116px;
+  width: 100%;
+  min-height: 0;
+  background: transparent;
+}
+
+.mfe-hero-app__shell {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .mfe-hero-app {
+    --ts-hero-shell-offset: 104px;
+  }
+
+  .ts-hero-discovery,
+  .ts-hero-discovery__feature {
+    min-height: max(460px, calc(100svh - var(--ts-hero-shell-offset, 104px)));
+  }
+
+  .ts-hero-discovery__content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    bottom: 24px;
+  }
+
+  .ts-hero-discovery__title {
+    max-width: 100%;
+  }
+
+  .ts-hero-discovery__title-link {
+    font-size: clamp(34px, 14vw, 60px);
+    line-height: 0.96;
+  }
+
+  .ts-hero-discovery__view-more {
+    width: 100%;
+  }
+
+  .ts-hero-discovery__feature-rail {
+    left: 16px;
+    right: 16px;
+    top: 58px;
+    bottom: auto;
+    width: auto;
+    height: 86px;
+  }
+
+  .ts-hero-discovery__feature-rail-track {
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 0 4px;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  }
+
+  .ts-hero-discovery__feature-card {
+    flex: 0 0 116px;
+    width: 116px;
+    height: 78px;
+  }
+
+  .ts-hero-discovery__feature-card:hover,
+  .ts-hero-discovery__feature-card:focus-visible,
+  .ts-hero-discovery__feature-card--active {
+    transform: translateY(-2px);
+  }
+
+  .ts-hero-discovery__feature-card-name {
+    font-size: 11px;
+  }
+
+  .ts-hero-discovery__cover-skeleton-title {
+    left: 16px;
+    right: 16px;
+    bottom: 96px;
+    width: auto;
+    height: clamp(86px, 22vw, 132px);
+    border-radius: 16px;
+  }
+
+  .ts-hero-discovery__cover-skeleton-action {
+    left: 16px;
+    right: 16px;
+    bottom: 28px;
+    width: auto;
+  }
+
+  .ts-hero-discovery__detail-topbar {
+    gap: 8px;
+    padding: 10px 10px 0;
+  }
+
+  .ts-hero-discovery__detail-back-btn {
+    padding: 8px 12px;
+  }
+
+  .ts-hero-discovery__detail-title {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .ts-hero-discovery__detail-panel {
+    top: 70px;
+    right: 12px;
+    left: auto;
+    width: min(300px, calc(100vw - 24px));
+    max-height: calc(100dvh - 168px);
+  }
+
+  .ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: calc(100dvh - 168px);
+  }
+
+  .ts-hero-discovery__detail-panel-scroll {
+    max-height: calc(100dvh - 168px);
+    padding: 14px 12px 14px 16px;
+  }
+
+  .ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel-scroll {
+    max-height: calc(100dvh - 168px);
+  }
+
+  .ts-hero-discovery__detail-room-bar {
+    padding: 12px;
+  }
+
+  .ts-hero-discovery__detail-hint {
+    left: 12px;
+    right: 12px;
+    bottom: 102px;
+    transform: none;
+    border-radius: 16px;
+    text-align: center;
+  }
+
+  .ts-hero-discovery__detail-comment-textarea {
+    min-height: 76px;
+    max-height: min(20dvh, 140px);
+  }
+
+  .ts-hero-discovery__detail-comment-submit {
+    width: 100%;
+    justify-self: stretch;
+    justify-content: center;
+  }
+
+  .ts-hero-discovery__detail-room-btn {
+    width: 84px;
+  }
+
+  .ts-hero-discovery__feature:fullscreen .ts-hero-discovery__content,
+  .ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__content {
+    top: max(56px, env(safe-area-inset-top, 0px) + 24px);
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
+
+  .ts-hero-discovery__feature:fullscreen .ts-hero-discovery__title,
+  .ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__title {
+    max-width: 100%;
+  }
+
+  .ts-hero-discovery__feature:fullscreen .ts-hero-discovery__title-link,
+  .ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__title-link {
+    font-size: clamp(30px, 11vw, 50px);
+    line-height: 0.98;
+  }
+
+  .ts-hero-discovery__feature:fullscreen .ts-hero-discovery__view-more,
+  .ts-hero-discovery__feature.is-fullscreen .ts-hero-discovery__view-more {
+    width: 100%;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1120px) {
+  .ts-hero-discovery__detail-panel {
+    width: min(340px, calc(100vw - 32px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-hero-discovery__cover-skeleton::before {
+    animation: none;
+    transform: none;
+    opacity: 0.38;
+  }
+}
