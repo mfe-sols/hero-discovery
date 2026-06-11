@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
+import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 
 import type { HeroDiscoveryDetailHotspot, HeroDiscoveryViewModel } from "./model";
 
@@ -129,6 +130,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const roomButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const featureViewerRef = useRef<ViewerRuntime | null>(null);
   const viewerRef = useRef<ViewerRuntime | null>(null);
+  const vrBtnRef = useRef<HTMLElement | null>(null);
   const featureSkeletonTimerRef = useRef<number | null>(null);
   const featureHasLoadedRef = useRef(false);
   const isDetailOpenRef = useRef(false);
@@ -145,6 +147,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const [isDetailFullscreen, setIsDetailFullscreen] = useState(false);
+  const [vrSupported, setVrSupported] = useState(false);
   const [autoRotate, setAutoRotate] = useState(false);
   const [activeRoomId, setActiveRoomId] = useState(vm.detailRooms[0]?.id ?? "");
   const [isViewerLoading, setIsViewerLoading] = useState(false);
@@ -268,6 +271,11 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   };
 
   const enterDetailVrMode = async () => {
+    if (vrBtnRef.current) {
+      vrBtnRef.current.click();
+      return;
+    }
+
     setAutoRotate(true);
     if (typeof document !== "undefined" && document.fullscreenElement !== detailRef.current) {
       await toggleDetailFullscreen();
@@ -334,6 +342,30 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     onChange();
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
+
+  /* ── WebXR VR button (injected by Three.js VRButton helper) ── */
+  useEffect(() => {
+    const runtime = viewerRef.current;
+    const container = detailRef.current;
+    if (!isDetailOpen || !vrSupported || !runtime || !container) return undefined;
+
+    const btn = VRButton.createButton(runtime.renderer) as HTMLElement;
+    /* Override VRButton default fixed-position so it sits inside the container */
+    btn.style.position = "absolute";
+    btn.style.bottom = "80px";
+    btn.style.left = "50%";
+    btn.style.transform = "translateX(-50%)";
+    btn.style.zIndex = "10";
+    container.appendChild(btn);
+    vrBtnRef.current = btn;
+
+    return () => {
+      if (vrBtnRef.current && container.contains(vrBtnRef.current)) {
+        container.removeChild(vrBtnRef.current);
+      }
+      vrBtnRef.current = null;
+    };
+  }, [isDetailOpen, vrSupported]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -553,6 +585,13 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.xr.enabled = true;
+
+    /* Detect WebXR VR headset support */
+    navigator.xr
+      ?.isSessionSupported("immersive-vr")
+      .then((ok) => setVrSupported(ok))
+      .catch(() => {});
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
