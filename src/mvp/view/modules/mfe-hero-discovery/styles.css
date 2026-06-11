@@ -1057,6 +1057,7 @@
 @media (max-width: 720px) {
   .mfe-hero-app {
     --ts-hero-shell-offset: 104px;
+    --ts-hero-detail-mobile-topbar-offset: calc(env(safe-area-inset-top, 0px) + 92px);
   }
 
   .ts-hero-discovery,
@@ -1135,41 +1136,55 @@
   }
 
   .ts-hero-discovery__detail-topbar {
-    gap: 8px;
-    padding: 10px 10px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px 10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px 0;
   }
 
   .ts-hero-discovery__detail-back-btn {
     padding: 8px 12px;
   }
 
+  .ts-hero-discovery__detail-actions {
+    justify-self: end;
+  }
+
   .ts-hero-discovery__detail-title {
-    padding: 0 10px;
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding: 0 2px;
     font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   .ts-hero-discovery__detail-panel {
-    top: 70px;
+    top: var(--ts-hero-detail-mobile-topbar-offset);
     right: 12px;
     left: auto;
     width: min(300px, calc(100vw - 24px));
-    max-height: calc(100dvh - 168px);
+    max-height: calc(100dvh - var(--ts-hero-detail-mobile-topbar-offset) - 24px);
   }
 
   .ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel {
     left: 12px;
     right: 12px;
     width: auto;
-    max-height: calc(100dvh - 168px);
+    max-height: calc(100dvh - var(--ts-hero-detail-mobile-topbar-offset) - 24px);
   }
 
   .ts-hero-discovery__detail-panel-scroll {
-    max-height: calc(100dvh - 168px);
+    max-height: calc(100dvh - var(--ts-hero-detail-mobile-topbar-offset) - 24px);
     padding: 14px 12px 14px 16px;
   }
 
   .ts-hero-discovery__detail--panel-expanded .ts-hero-discovery__detail-panel-scroll {
-    max-height: calc(100dvh - 168px);
+    max-height: calc(100dvh - var(--ts-hero-detail-mobile-topbar-offset) - 24px);
   }
 
   .ts-hero-discovery__detail-room-bar {
