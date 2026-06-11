@@ -149,6 +149,7 @@ export const HERO_DISCOVERY_MOCK: HeroDiscoveryData = {
   detailCollapseLabel: "Collapse details",
   detailEnterFullscreenLabel: "Enter fullscreen",
   detailExitFullscreenLabel: "Exit fullscreen",
+  detailVrModeLabel: "Enter VR mode",
   detailCommentRatingLabel: "Your rating",
   detailCommentFormLabel: "Your comment",
   detailCommentFormPlaceholder: "Share what you noticed after viewing the 360° space...",

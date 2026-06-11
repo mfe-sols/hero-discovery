@@ -15,6 +15,27 @@ const DEG2RAD = Math.PI / 180;
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const clampRating = (value: number) => Math.max(1, Math.min(5, Math.round(value)));
 
+// Center an active button inside its own scroll container (rail) WITHOUT ever
+// scrolling the page. Native scrollIntoView bubbles to the window and, on mobile
+// where the rail only scrolls horizontally, drags the whole document up to the
+// hero whenever the banner auto-advances. We scroll the container directly instead.
+const centerButtonInRail = (button: HTMLElement | null) => {
+  const track = button?.parentElement;
+  if (!button || !track) return;
+  const canScrollX = track.scrollWidth > track.clientWidth + 1;
+  const canScrollY = track.scrollHeight > track.clientHeight + 1;
+  if (!canScrollX && !canScrollY) return;
+  const trackRect = track.getBoundingClientRect();
+  const btnRect = button.getBoundingClientRect();
+  if (canScrollX) {
+    const delta = btnRect.left + btnRect.width / 2 - (trackRect.left + trackRect.width / 2);
+    track.scrollBy({ left: delta, behavior: "smooth" });
+  } else {
+    const delta = btnRect.top + btnRect.height / 2 - (trackRect.top + trackRect.height / 2);
+    track.scrollBy({ top: delta, behavior: "smooth" });
+  }
+};
+
 const proxyUrl = (src: string, w: number, h: number, q: number, fmt = "jpg") =>
   `https://wsrv.nl/?url=${encodeURIComponent(src)}&w=${w}&h=${h}&q=${q}&output=${fmt}`;
 
@@ -246,6 +267,13 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     }
   };
 
+  const enterDetailVrMode = async () => {
+    setAutoRotate(true);
+    if (typeof document !== "undefined" && document.fullscreenElement !== detailRef.current) {
+      await toggleDetailFullscreen();
+    }
+  };
+
   useEffect(() => {
     setActiveRoomId(vm.detailRooms[0]?.id ?? "");
     setActiveFeatureId(vm.featureArticles[0]?.id ?? "");
@@ -274,11 +302,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   useEffect(() => {
     if (!activeFeatureId) return;
 
-    featureButtonRefs.current[activeFeatureId]?.scrollIntoView({
-      block: "nearest",
-      inline: "center",
-      behavior: "smooth",
-    });
+    centerButtonInRail(featureButtonRefs.current[activeFeatureId]);
   }, [activeFeatureId]);
 
   const onSubmitComment = (event: { preventDefault: () => void }) => {
@@ -298,11 +322,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   useEffect(() => {
     if (!isDetailOpen || !activeRoomId) return;
 
-    roomButtonRefs.current[activeRoomId]?.scrollIntoView({
-      block: "nearest",
-      inline: "center",
-      behavior: "smooth",
-    });
+    centerButtonInRail(roomButtonRefs.current[activeRoomId]);
   }, [activeRoomId, isDetailOpen]);
 
   useEffect(() => {
@@ -965,6 +985,20 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
                       ) : (
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       )}
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="ts-hero-discovery__detail-icon-btn ts-hero-discovery__detail-icon-btn--vr"
+                    onClick={() => { void enterDetailVrMode(); }}
+                    aria-label={vm.detailVrModeLabel}
+                    title={vm.detailVrModeLabel}
+                  >
+                    <svg width="20" height="18" viewBox="0 0 24 16" fill="none" aria-hidden="true">
+                      <rect x="1" y="1" width="22" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+                      <circle cx="7" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="17" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M10 12c.5.8 3.5.8 4 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                   </button>
                 </div>

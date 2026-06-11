@@ -66,6 +66,7 @@ export type HeroDiscoveryData = {
   detailCollapseLabel: string;
   detailEnterFullscreenLabel: string;
   detailExitFullscreenLabel: string;
+  detailVrModeLabel: string;
   detailCommentRatingLabel: string;
   detailCommentFormLabel: string;
   detailCommentFormPlaceholder: string;
