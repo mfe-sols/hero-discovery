@@ -153,6 +153,8 @@ export const HERO_DISCOVERY_MOCK: HeroDiscoveryData = {
   detailCommentFormLabel: "Your comment",
   detailCommentFormPlaceholder: "Share what you noticed after viewing the 360° space...",
   detailCommentFormAction: "Post comment",
+  detailFeedbackShowLabel: "Show reviews and comments",
+  detailFeedbackHideLabel: "Hide reviews and comments",
   detailCommentAuthorName: "You",
   detailCommentAuthorRole: "Signed-in traveler",
 };

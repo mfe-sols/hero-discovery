@@ -70,6 +70,8 @@ export type HeroDiscoveryData = {
   detailCommentFormLabel: string;
   detailCommentFormPlaceholder: string;
   detailCommentFormAction: string;
+  detailFeedbackShowLabel: string;
+  detailFeedbackHideLabel: string;
   detailCommentAuthorName: string;
   detailCommentAuthorRole: string;
 };

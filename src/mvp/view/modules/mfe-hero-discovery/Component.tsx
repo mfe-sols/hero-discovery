@@ -99,6 +99,8 @@ function loadTexture(
 export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDiscoveryProps): JSX.Element => {
   const detailRef = useRef<HTMLDivElement | null>(null);
   const featureRef = useRef<HTMLElement | null>(null);
+  const discoveryBarHostRef = useRef<HTMLDivElement | null>(null);
+  const discoveryBarRef = useRef<HTMLFormElement | null>(null);
   const featureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const hotspotRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -138,6 +140,9 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const [commentRating, setCommentRating] = useState(() => clampRating(vm.detailComments[0]?.rating ?? 5));
   const [submittedComment, setSubmittedComment] = useState<string | null>(null);
   const [submittedRating, setSubmittedRating] = useState<number | null>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isMobileFeedbackOpen, setIsMobileFeedbackOpen] = useState(false);
+  const [isDiscoveryBarPinned, setIsDiscoveryBarPinned] = useState(false);
 
   const activeRoom = useMemo(
     () => vm.detailRooms.find((room) => room.id === activeRoomId) ?? vm.detailRooms[0],
@@ -213,6 +218,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     if (!activeRoom && vm.detailRooms[0]) {
       setActiveRoomId(vm.detailRooms[0].id);
     }
+    setIsMobileFeedbackOpen(false);
     setIsDetailOpen(true);
   };
 
@@ -287,6 +293,8 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     setCommentDraft("");
   };
 
+  const isFeedbackOpen = !isMobileViewport || isMobileFeedbackOpen;
+
   useEffect(() => {
     if (!isDetailOpen || !activeRoomId) return;
 
@@ -305,6 +313,29 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     document.addEventListener("fullscreenchange", onChange);
     onChange();
     return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const media = window.matchMedia("(max-width: 720px)");
+    const updateViewport = (event?: MediaQueryListEvent | MediaQueryList) => {
+      const nextIsMobile = (event ?? media).matches;
+      setIsMobileViewport(nextIsMobile);
+      if (!nextIsMobile) {
+        setIsMobileFeedbackOpen(true);
+      }
+    };
+
+    updateViewport(media);
+
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", updateViewport);
+      return () => media.removeEventListener("change", updateViewport);
+    }
+
+    media.addListener(updateViewport);
+    return () => media.removeListener(updateViewport);
   }, []);
 
   useEffect(() => {
@@ -686,6 +717,54 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     return () => canvas.removeEventListener("wheel", onWheel);
   }, [isDetailOpen]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    let frame = 0;
+    const syncDiscoveryBar = () => {
+      frame = 0;
+
+      const host = discoveryBarHostRef.current;
+      const bar = discoveryBarRef.current;
+      if (!host || !bar) return;
+
+      const header = document.querySelector(".hdr-shell") as HTMLElement | null;
+      const headerBottom = Math.max(header?.getBoundingClientRect().bottom ?? 0, 0);
+      const hostRect = host.getBoundingClientRect();
+      const nextPinned = hostRect.top <= headerBottom + 12;
+
+      if (nextPinned) {
+        bar.style.setProperty("--ts-hero-discovery-bar-top", `${Math.round(headerBottom + 12)}px`);
+        bar.style.setProperty("--ts-hero-discovery-bar-left", `${Math.round(hostRect.left)}px`);
+        bar.style.setProperty("--ts-hero-discovery-bar-width", `${Math.round(hostRect.width)}px`);
+      } else {
+        bar.style.removeProperty("--ts-hero-discovery-bar-top");
+        bar.style.removeProperty("--ts-hero-discovery-bar-left");
+        bar.style.removeProperty("--ts-hero-discovery-bar-width");
+      }
+
+      setIsDiscoveryBarPinned((prev) => (prev === nextPinned ? prev : nextPinned));
+    };
+
+    syncDiscoveryBar();
+
+    const onViewportChange = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncDiscoveryBar);
+    };
+
+    window.addEventListener("scroll", onViewportChange, { passive: true });
+    window.addEventListener("resize", onViewportChange);
+
+    return () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+      window.removeEventListener("scroll", onViewportChange);
+      window.removeEventListener("resize", onViewportChange);
+    };
+  }, []);
+
   return (
     <section className="ts-hero-discovery" aria-labelledby="ts-hero-discovery-title">
       <article
@@ -719,7 +798,13 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
           </span>
         ) : null}
 
-        <form className="ts-hero-discovery__discovery-bar" role="search" onSubmit={handleDiscoverySubmit}>
+        <div ref={discoveryBarHostRef} className="ts-hero-discovery__discovery-bar-host" aria-hidden="true" />
+        <form
+          ref={discoveryBarRef}
+          className={`ts-hero-discovery__discovery-bar${isDiscoveryBarPinned ? " ts-hero-discovery__discovery-bar--pinned" : ""}`}
+          role="search"
+          onSubmit={handleDiscoverySubmit}
+        >
           <label className="ts-hero-discovery__discovery-label" htmlFor="ts-hero-discovery-search">
             {vm.discoverySearchLabel}
           </label>
@@ -910,83 +995,99 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
                   <p className="ts-hero-discovery__detail-address">{vm.detailAddress}</p>
                   <p className="ts-hero-discovery__detail-summary">{activeRoom.summary}</p>
 
-                  <section className="ts-hero-discovery__detail-review-block">
-                    <div className="ts-hero-discovery__detail-review-head">
-                      <span className="ts-hero-discovery__detail-review-label">{vm.detailReviewLabel}</span>
-                      <span className="ts-hero-discovery__detail-review-summary">
-                        <svg className="ts-hero-discovery__detail-review-rating-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
-                        </svg>
-                        <span>{vm.detailReviewSummary}</span>
-                      </span>
-                    </div>
+                  <div className={`ts-hero-discovery__detail-feedback${isFeedbackOpen ? " is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="ts-hero-discovery__detail-feedback-toggle"
+                      onClick={() => setIsMobileFeedbackOpen((current) => !current)}
+                      aria-expanded={isFeedbackOpen}
+                    >
+                      <span>{isFeedbackOpen ? vm.detailFeedbackHideLabel : vm.detailFeedbackShowLabel}</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d={isFeedbackOpen ? "M7 14l5-5 5 5" : "M7 10l5 5 5-5"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
 
-                    <div className="ts-hero-discovery__detail-review-list">
-                      {detailComments.map((comment) => (
-                        <article key={comment.id} className="ts-hero-discovery__detail-review-item">
-                          <div className="ts-hero-discovery__detail-review-item-head">
-                            <p className="ts-hero-discovery__detail-review-author">{comment.author} · {comment.role}</p>
-                            <span className="ts-hero-discovery__detail-review-item-rating">
-                              <svg className="ts-hero-discovery__detail-review-rating-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M12 3.75 14.547 8.912l5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
-                              </svg>
-                              <span>{comment.rating.toFixed(1)}</span>
-                            </span>
-                          </div>
-                          <p className="ts-hero-discovery__detail-review-text">“{comment.body}”</p>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-
-                  {isAuthenticated ? (
-                    <form className="ts-hero-discovery__detail-comment-form" onSubmit={onSubmitComment}>
-                      <div className="ts-hero-discovery__detail-comment-rating" role="group" aria-label={vm.detailCommentRatingLabel}>
-                        <span className="ts-hero-discovery__detail-comment-form-label">{vm.detailCommentRatingLabel}</span>
-                        <div className="ts-hero-discovery__detail-comment-stars">
-                          {[1, 2, 3, 4, 5].map((ratingValue) => {
-                            const active = ratingValue <= commentRating;
-                            return (
-                              <button
-                                key={ratingValue}
-                                type="button"
-                                className={`ts-hero-discovery__detail-comment-star${active ? " ts-hero-discovery__detail-comment-star--active" : ""}`}
-                                onClick={() => setCommentRating(ratingValue)}
-                                aria-label={`${vm.detailCommentRatingLabel} ${ratingValue}`}
-                                aria-pressed={active}
-                              >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                  <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
-                                </svg>
-                              </button>
-                            );
-                          })}
+                    <div className={`ts-hero-discovery__detail-feedback-content${isFeedbackOpen ? " is-open" : ""}`}>
+                      <section className="ts-hero-discovery__detail-review-block">
+                        <div className="ts-hero-discovery__detail-review-head">
+                          <span className="ts-hero-discovery__detail-review-label">{vm.detailReviewLabel}</span>
+                          <span className="ts-hero-discovery__detail-review-summary">
+                            <svg className="ts-hero-discovery__detail-review-rating-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                              <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
+                            </svg>
+                            <span>{vm.detailReviewSummary}</span>
+                          </span>
                         </div>
-                      </div>
-                      <label className="ts-hero-discovery__detail-comment-form-label" htmlFor="ts-hero-discovery-comment-input">
-                        {vm.detailCommentFormLabel}
-                      </label>
-                      <textarea
-                        id="ts-hero-discovery-comment-input"
-                        className="ts-hero-discovery__detail-comment-textarea"
-                        value={commentDraft}
-                        onChange={(event) => setCommentDraft(event.target.value)}
-                        placeholder={vm.detailCommentFormPlaceholder}
-                        rows={3}
-                      />
-                      <button
-                        type="submit"
-                        className="ts-hero-discovery__detail-comment-submit"
-                        disabled={!commentDraft.trim()}
-                      >
-                        <span>{vm.detailCommentFormAction}</span>
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="ts-hero-discovery__detail-comment-login-hint" role="note">
-                      {commentLoginHint}
+
+                        <div className="ts-hero-discovery__detail-review-list">
+                          {detailComments.map((comment) => (
+                            <article key={comment.id} className="ts-hero-discovery__detail-review-item">
+                              <div className="ts-hero-discovery__detail-review-item-head">
+                                <p className="ts-hero-discovery__detail-review-author">{comment.author} · {comment.role}</p>
+                                <span className="ts-hero-discovery__detail-review-item-rating">
+                                  <svg className="ts-hero-discovery__detail-review-rating-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 3.75 14.547 8.912l5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
+                                  </svg>
+                                  <span>{comment.rating.toFixed(1)}</span>
+                                </span>
+                              </div>
+                              <p className="ts-hero-discovery__detail-review-text">“{comment.body}”</p>
+                            </article>
+                          ))}
+                        </div>
+                      </section>
+
+                      {isAuthenticated ? (
+                        <form className="ts-hero-discovery__detail-comment-form" onSubmit={onSubmitComment}>
+                          <div className="ts-hero-discovery__detail-comment-rating" role="group" aria-label={vm.detailCommentRatingLabel}>
+                            <span className="ts-hero-discovery__detail-comment-form-label">{vm.detailCommentRatingLabel}</span>
+                            <div className="ts-hero-discovery__detail-comment-stars">
+                              {[1, 2, 3, 4, 5].map((ratingValue) => {
+                                const active = ratingValue <= commentRating;
+                                return (
+                                  <button
+                                    key={ratingValue}
+                                    type="button"
+                                    className={`ts-hero-discovery__detail-comment-star${active ? " ts-hero-discovery__detail-comment-star--active" : ""}`}
+                                    onClick={() => setCommentRating(ratingValue)}
+                                    aria-label={`${vm.detailCommentRatingLabel} ${ratingValue}`}
+                                    aria-pressed={active}
+                                  >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                      <path d="M12 3.75l2.547 5.162 5.697.828-4.122 4.018.973 5.675L12 16.754l-5.095 2.679.973-5.675L3.756 9.74l5.697-.828L12 3.75z" fill="currentColor" />
+                                    </svg>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <label className="ts-hero-discovery__detail-comment-form-label" htmlFor="ts-hero-discovery-comment-input">
+                            {vm.detailCommentFormLabel}
+                          </label>
+                          <textarea
+                            id="ts-hero-discovery-comment-input"
+                            className="ts-hero-discovery__detail-comment-textarea"
+                            value={commentDraft}
+                            onChange={(event) => setCommentDraft(event.target.value)}
+                            placeholder={vm.detailCommentFormPlaceholder}
+                            rows={3}
+                          />
+                          <button
+                            type="submit"
+                            className="ts-hero-discovery__detail-comment-submit"
+                            disabled={!commentDraft.trim()}
+                          >
+                            <span>{vm.detailCommentFormAction}</span>
+                          </button>
+                        </form>
+                      ) : (
+                        <div className="ts-hero-discovery__detail-comment-login-hint" role="note">
+                          {commentLoginHint}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </aside>
 
