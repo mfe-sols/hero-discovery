@@ -61,7 +61,6 @@ sharedLoader.setCrossOrigin("anonymous");
 const textureCache = new Map<string, THREE.Texture>();
 const FEATURE_BANNER_TIMING = {
   skeletonMinMs: 720,
-  autoAdvanceMs: 10_000,
   rotationDurationMs: 45_000,
 } as const;
 
@@ -133,6 +132,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const vrBtnRef = useRef<HTMLElement | null>(null);
   const featureSkeletonTimerRef = useRef<number | null>(null);
   const featureHasLoadedRef = useRef(false);
+  const featureRotationEnabledRef = useRef(false);
   const isDetailOpenRef = useRef(false);
   const autoRotateRef = useRef(false);
   const featureCameraRef = useRef({ lon: 0, lat: -2, fov: 68 });
@@ -186,6 +186,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   const activeFeaturePanoramaUrl = activeFeatureArticle?.panoramaUrl ?? featurePanoramaUrl;
   const shouldUseFeaturePanorama = Boolean(activeFeaturePanoramaUrl);
   const isActiveFeaturePanoramaReady = !activeFeaturePanoramaUrl || displayedFeaturePanoramaUrl === activeFeaturePanoramaUrl;
+  const isFeatureInitialBlocking = isFeatureViewerLoading && !activeFeatureCoverUrl;
 
   const detailComments = useMemo(() => {
     if (!isAuthenticated || !submittedComment?.trim()) return vm.detailComments;
@@ -302,10 +303,14 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
         const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % vm.featureArticles.length : 0;
         return vm.featureArticles[nextIndex]?.id ?? currentId;
       });
-    }, FEATURE_BANNER_TIMING.autoAdvanceMs);
+    }, FEATURE_BANNER_TIMING.rotationDurationMs);
 
     return () => window.clearTimeout(timeout);
   }, [activeFeatureId, isActiveFeaturePanoramaReady, isDetailOpen, isFeatureRailPaused, isFeatureViewerLoading, vm.featureArticles]);
+
+  useEffect(() => {
+    featureRotationEnabledRef.current = !isFeatureViewerLoading && isActiveFeaturePanoramaReady;
+  }, [isActiveFeaturePanoramaReady, isFeatureViewerLoading]);
 
   useEffect(() => {
     if (!activeFeatureId) return;
@@ -404,17 +409,39 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
-    const preloadedImages = vm.featureArticles.map((article) => {
-      const image = new Image();
-      image.decoding = "async";
-      image.src = article.heroImageUrl ?? article.imageUrl;
-      return image;
-    });
+    const activeCoverUrl = activeFeatureArticle?.heroImageUrl ?? activeFeatureArticle?.imageUrl ?? vm.featureImageUrl;
+    const deferredImageUrls = vm.featureArticles
+      .map((article) => article.heroImageUrl ?? article.imageUrl)
+      .filter((url): url is string => Boolean(url) && url !== activeCoverUrl);
+
+    const preloadedImages: HTMLImageElement[] = [];
+    let deferredPreloadTimer = 0;
+
+    if (activeCoverUrl) {
+      const coverImage = new Image();
+      coverImage.decoding = "async";
+      coverImage.src = activeCoverUrl;
+      preloadedImages.push(coverImage);
+    }
+
+    if (deferredImageUrls.length > 0) {
+      deferredPreloadTimer = window.setTimeout(() => {
+        deferredImageUrls.forEach((src) => {
+          const image = new Image();
+          image.decoding = "async";
+          image.src = src;
+          preloadedImages.push(image);
+        });
+      }, FEATURE_BANNER_TIMING.skeletonMinMs);
+    }
 
     return () => {
+      if (deferredPreloadTimer) {
+        window.clearTimeout(deferredPreloadTimer);
+      }
       preloadedImages.length = 0;
     };
-  }, [vm.featureArticles]);
+  }, [activeFeatureArticle, vm.featureArticles, vm.featureImageUrl]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -460,7 +487,9 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
       if (!runtime || isDetailOpenRef.current || document.hidden) return;
 
       const cam = featureCameraRef.current;
-      cam.lon = (cam.lon + frameDeltaMs * degreesPerMs) % 360;
+      if (featureRotationEnabledRef.current) {
+        cam.lon = (cam.lon + frameDeltaMs * degreesPerMs) % 360;
+      }
       const phi = (90 - cam.lat) * DEG2RAD;
       const theta = cam.lon * DEG2RAD;
 
@@ -510,6 +539,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
 
     const isInitialLoad = !featureHasLoadedRef.current;
     const skeletonStartedAt = window.performance.now();
+    featureCameraRef.current.lon = 0;
 
     if (isInitialLoad) {
       setIsFeatureViewerLoading(true);
@@ -828,8 +858,8 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     <section className="ts-hero-discovery" aria-labelledby="ts-hero-discovery-title">
       <article
         ref={featureRef}
-        className={`ts-hero-discovery__feature${isFeatureViewerLoading ? " ts-hero-discovery__feature--loading" : ""}`}
-        aria-busy={isFeatureViewerLoading}
+        className={`ts-hero-discovery__feature${isFeatureInitialBlocking ? " ts-hero-discovery__feature--loading" : ""}`}
+        aria-busy={isFeatureInitialBlocking}
       >
         <button
           type="button"
@@ -849,7 +879,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
           <span className="ts-hero-discovery__cover-overlay" />
         </button>
 
-        {isFeatureViewerLoading ? (
+        {isFeatureInitialBlocking ? (
           <span className="ts-hero-discovery__cover-skeleton" aria-hidden="true">
             <span className="ts-hero-discovery__cover-skeleton-band" />
             <span className="ts-hero-discovery__cover-skeleton-title" />
