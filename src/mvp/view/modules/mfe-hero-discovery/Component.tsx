@@ -410,9 +410,13 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
     if (typeof window === "undefined") return undefined;
 
     const activeCoverUrl = activeFeatureArticle?.heroImageUrl ?? activeFeatureArticle?.imageUrl ?? vm.featureImageUrl;
-    const deferredImageUrls = vm.featureArticles
+    const deferredCoverUrls = vm.featureArticles
       .map((article) => article.heroImageUrl ?? article.imageUrl)
       .filter((url): url is string => Boolean(url) && url !== activeCoverUrl);
+    const deferredPanoramaPreviewUrls = vm.featureArticles
+      .map((article) => article.panoramaUrl)
+      .filter((url): url is string => Boolean(url) && url !== activeFeaturePanoramaUrl)
+      .map((url) => bannerPreviewUrl(url));
 
     const preloadedImages: HTMLImageElement[] = [];
     let deferredPreloadTimer = 0;
@@ -424,15 +428,15 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
       preloadedImages.push(coverImage);
     }
 
-    if (deferredImageUrls.length > 0) {
+    if (deferredCoverUrls.length > 0 || deferredPanoramaPreviewUrls.length > 0) {
       deferredPreloadTimer = window.setTimeout(() => {
-        deferredImageUrls.forEach((src) => {
+        [...deferredCoverUrls, ...deferredPanoramaPreviewUrls].forEach((src) => {
           const image = new Image();
           image.decoding = "async";
           image.src = src;
           preloadedImages.push(image);
         });
-      }, FEATURE_BANNER_TIMING.skeletonMinMs);
+      }, FEATURE_BANNER_TIMING.skeletonMinMs + 320);
     }
 
     return () => {
@@ -441,7 +445,7 @@ export const HeroDiscovery = ({ vm, isAuthenticated, commentLoginHint }: HeroDis
       }
       preloadedImages.length = 0;
     };
-  }, [activeFeatureArticle, vm.featureArticles, vm.featureImageUrl]);
+  }, [activeFeatureArticle, activeFeaturePanoramaUrl, vm.featureArticles, vm.featureImageUrl]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;

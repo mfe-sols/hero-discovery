@@ -67,7 +67,15 @@ const MODERN = {
   terrace: PH("aft_lounge"),
 };
 
-const HERO_PANORAMA = PH("secluded_beach");
+const SCENIC = {
+  coast: PH("secluded_beach"),
+  sunset: PH("venice_sunset"),
+  lagoon: PH("symmetrical_garden_02"),
+  dawn: PH("kiara_1_dawn"),
+  terrace: PH("aft_lounge"),
+};
+
+const HERO_PANORAMA = SCENIC.coast;
 
 const THUMB = {
   lounge: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=160&q=75",
@@ -172,7 +180,7 @@ const DESTINATIONS: Destination[] = [
         kicker: { vi: "Cẩm nang", en: "Guide" },
         imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=420&q=82&auto=format&fit=crop",
         heroImageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2200&q=90&auto=format&fit=crop",
-        panoramaUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2200&q=90&auto=format&fit=crop",
+        panoramaUrl: SCENIC.sunset,
         imageAlt: { vi: "Hoàng hôn trên bãi biển Phú Quốc", en: "Sunset over a Phu Quoc beach" },
       },
       {
@@ -181,7 +189,7 @@ const DESTINATIONS: Destination[] = [
         kicker: { vi: "Trải nghiệm", en: "Experience" },
         imageUrl: "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=420&q=82&auto=format&fit=crop",
         heroImageUrl: "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=2200&q=90&auto=format&fit=crop",
-        panoramaUrl: "https://images.unsplash.com/photo-1512100356356-de1b84283e18?w=2200&q=90&auto=format&fit=crop",
+        panoramaUrl: SCENIC.coast,
         imageAlt: { vi: "Biển xanh và thuyền du lịch đảo", en: "Blue sea and island tour boat" },
       },
       {
@@ -190,7 +198,7 @@ const DESTINATIONS: Destination[] = [
         kicker: { vi: "Hoạt động", en: "Activity" },
         imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=420&q=82&auto=format&fit=crop",
         heroImageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=2200&q=90&auto=format&fit=crop",
-        panoramaUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=2200&q=90&auto=format&fit=crop",
+        panoramaUrl: SCENIC.lagoon,
         imageAlt: { vi: "Mặt nước biển xanh cho hoạt động lặn ngắm san hô", en: "Blue water for coral snorkeling" },
       },
       {
@@ -199,7 +207,7 @@ const DESTINATIONS: Destination[] = [
         kicker: { vi: "Ẩm thực", en: "Dining" },
         imageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=420&q=82&auto=format&fit=crop",
         heroImageUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=2200&q=90&auto=format&fit=crop",
-        panoramaUrl: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=2200&q=90&auto=format&fit=crop",
+        panoramaUrl: SCENIC.terrace,
         imageAlt: { vi: "Bàn ăn tối cạnh biển", en: "Dinner table near the coast" },
       },
       {
@@ -208,7 +216,7 @@ const DESTINATIONS: Destination[] = [
         kicker: { vi: "Lịch trình", en: "Itinerary" },
         imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=420&q=82&auto=format&fit=crop",
         heroImageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=2200&q=90&auto=format&fit=crop",
-        panoramaUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=2200&q=90&auto=format&fit=crop",
+        panoramaUrl: SCENIC.dawn,
         imageAlt: { vi: "Resort biển với hồ bơi và hàng dừa", en: "Beach resort with pool and palm trees" },
       },
     ],
